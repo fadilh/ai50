@@ -57,9 +57,7 @@ def result(board, action):
     """
     (i, j) = action
     newBoard = copy.deepcopy(board)
-
-    newBoard[i][j] == player(newBoard)
-    
+    newBoard[i][j] = player(newBoard)
     return newBoard
     
 
@@ -90,7 +88,12 @@ def terminal(board):
     if winner(board):
         return True
     
-    return not any(any(i == EMPTY for i in row) for row in board)
+    for row in board:
+        for cell in row:
+            if cell == EMPTY:
+                return False
+    
+    return True
 
 
 def utility(board):
@@ -108,55 +111,40 @@ def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    if terminal(board):
+    newBoard = copy.deepcopy(board)
+    if terminal(newBoard):
         return None
 
-    possibleMoves = actions(board)
-    scores = []
-    for action in possibleMoves:
-        bot = player(board)
-        if bot == X:
-            score = maximizer(result(board, action))
-        else:
-            score = minimizer(result(board, action))
+    bot = player(newBoard)
+    if bot == X:
+        m = maximizer(newBoard)
+        return m[1]
+    else:
+        m = minimizer(newBoard)
+        return m[1]
         
-        scores.append(score)
-
-
-    if len(scores) == 1:
-        return scores[0]
-
-    optimalMove = possibleMoves[0]
-    optimalValue = scores[0]
-
-    for i in range(len(possibleMoves)):
-        if player(board) == X:
-            if optimalValue < scores[i]:
-                optimalMove = possibleMoves[i]
-                optimalValue = scores[i]
-                if optimalValue == 1:
-                    return optimalMove
-        else:
-            if optimalValue > scores[i]:
-                optimalMove = possibleMoves[i]
-                optimalValue = scores[i]
-                if optimalValue == -1:
-                    return optimalMove
-
-    return optimalMove
 
 def maximizer(board):
     v = -math.inf
+    optimalMove = None
     if terminal(board):
-        return utility(board)
+        return (utility(board), optimalMove)
     for action in actions(board):
-        v = max(v, minimizer(result(board, action)))
-    return v
+        m = minimizer(result(board, action))[0]
+        if v < m:
+            v = m
+            optimalMove = action
+    
+    return (v, optimalMove)
 
 def minimizer(board):
     v = math.inf
+    optimalMove = None
     if terminal(board):
-        return utility(board)
+        return (utility(board), optimalMove)
     for action in actions(board):
-        v = min(v, maximizer(result(board, action)))
-    return v
+        m = maximizer(result(board, action))[0]
+        if v > m:
+            v = m
+            optimalMove = action
+    return (v, optimalMove)
