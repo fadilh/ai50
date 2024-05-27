@@ -55,10 +55,18 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
+
+    
     (i, j) = action
-    newBoard = copy.deepcopy(board)
-    newBoard[i][j] = player(newBoard)
-    return newBoard
+
+    if 0 <= i < 3 and 0 <= j < 3:
+        newBoard = copy.deepcopy(board)
+        if newBoard[i][j] != EMPTY:
+            raise Exception
+        newBoard[i][j] = player(newBoard)
+        return newBoard
+    else:
+        raise Exception
     
 
 def winner(board):
