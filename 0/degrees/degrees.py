@@ -55,7 +55,7 @@ def load_data(directory):
 def main():
     if len(sys.argv) > 2:
         sys.exit("Usage: python degrees.py [directory]")
-    directory = sys.argv[1] if len(sys.argv) == 2 else "large"
+    directory = sys.argv[1] if len(sys.argv) == 2 else "small"
 
     # Load data from files into memory
     print("Loading data...")
@@ -91,32 +91,28 @@ def shortest_path(source, target):
 
     If no possible path, returns None.
     """
-    seen = set()
-    src = Node(state=source, parent=None, action=None)
+    path = []
+    seen = []
+    src = people[source]
+    neighbors = neighbors_for_person(source)
     frontier = QueueFrontier()
-    frontier.add(src)
 
-    while True:
-        if frontier.empty():
-            return None
+    for neighbor in neighbors:
+        frontier.add(neighbor)
+
+    if frontier.empty():
+        return None
+    
+    while not frontier.empty():
         node = frontier.remove()
-        seen.add(node.state)
-        neighbors = neighbors_for_person(node.state)
-        # action - movie id, state - person id
-        for action, state in neighbors:
-            if not frontier.contains_state(state) and state not in seen:
-                child_node = Node(state=state, action=action, parent=node)
-                if child_node.state == target:
-                    path = []
-                    while child_node.parent:
-                        path.append((child_node.action, child_node.state))
-                        child_node = child_node.parent
-                    path.reverse()
-                    return path
-                else:
-                    frontier.add(child_node)
-        
+        seen.append(node)
+        if node[1] != target and node not in seen:
+            frontier.add(node)
+        elif node[1] == target:
+            path.append(node)
+            return path
 
+    
 def person_id_for_name(name):
     """
     Returns the IMDB id for a person's name,
